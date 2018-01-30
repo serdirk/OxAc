@@ -1664,7 +1664,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$elytra->setDamage($elytra->getDamage() + 1);
 					if($elytra->getDamage() >= 431){
 						$elytra = Item::get(Item::AIR);
-						$this->setGliding(false);
 					}
 					$this->inventory->setChestplate($elytra);
 				}
