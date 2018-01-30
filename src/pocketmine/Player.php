@@ -83,6 +83,7 @@ use pocketmine\inventory\PlayerInventory;
 use pocketmine\inventory\ShapedRecipe;
 use pocketmine\inventory\ShapelessRecipe;
 use pocketmine\item\Armor;
+use pocketmine\item\Elytra;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Food;
 use pocketmine\item\Item;
@@ -1658,6 +1659,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->spawned){
 			if($this->isGliding()){
 				$this->resetFallDistance();
+				if($currentTick % 20 === 0){
+					$elytra = $this->inventory->getChestplate();
+					$elytra->setDamage($elytra->getDamage() + 1);
+					if($elytra->getDamage() >= 431){
+						$elytra = Item::get(Item::AIR);
+						$this->setGliding(false);
+					}
+					$this->inventory->setChestplate($elytra);
+				}
 			}
 
 			$this->processMovement($tickDiff);
@@ -2505,41 +2515,18 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$potion->spawnToAll();
 					$this->level->addSound(new LaunchSound($this), $this->getViewers());
 				}
-			}
-
-			if($item instanceof Armor){
-				switch($item->getId()){
-					case Item::LEATHER_CAP:
-					case Item::CHAINMAIL_HELMET:
-					case Item::IRON_HELMET:
-					case Item::DIAMOND_HELMET:
-					case Item::GOLDEN_HELMET:
-						$this->inventory->setHelmet($item);
-						break;
-					case Item::LEATHER_TUNIC:
-					case Item::CHAINMAIL_CHESTPLATE:
-					case Item::IRON_CHESTPLATE:
-					case Item::DIAMOND_CHESTPLATE:
-					case Item::GOLDEN_CHESTPLATE:
-					case Item::ELYTRA:
-						$this->inventory->setChestplate($item);
-						break;
-					case Item::LEATHER_LEGGINGS:
-					case Item::CHAINMAIL_LEGGINGS:
-					case Item::IRON_LEGGINGS:
-					case Item::DIAMOND_LEGGINGS:
-					case Item::GOLDEN_LEGGINGS:
-						$this->inventory->setLeggings($item);
-						break;
-					case Item::LEATHER_BOOTS:
-					case Item::CHAINMAIL_BOOTS:
-					case Item::IRON_BOOTS:
-					case Item::DIAMOND_BOOTS:
-					case Item::GOLDEN_BOOTS:
-						$this->inventory->setBoots($item);
-						break;
+			}elseif($item instanceof Armor){
+				$slot = ($id - 298) % 4;
+				if($this->inventory->getArmorItem($slot)->getId() === Item::AIR){
+					$this->inventory->setArmorItem($slot, $item);
+					$this->inventory->setItemInHand(Item::get(Item::AIR));
 				}
-				$this->inventory->setItemInHand(Item::get(Item::AIR));
+			}elseif($item instanceof Elytra){
+				$slot = 1; //Chestplate slot
+				if($this->inventory->getArmorItem($slot)->getId() === Item::AIR){
+					$this->inventory->setArmorItem($slot, $item);
+					$this->inventory->setItemInHand(Item::get(Item::AIR));
+				}
 			}
 
 			$this->setDataFlag(self::DATA_FLAGS, self::DATA_FLAG_ACTION, true);
