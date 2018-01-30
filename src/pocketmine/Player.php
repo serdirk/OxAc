@@ -2522,9 +2522,8 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$this->inventory->setItemInHand(Item::get(Item::AIR));
 				}
 			}elseif($item instanceof Elytra){
-				$slot = 1; //Chestplate slot
-				if($this->inventory->getArmorItem($slot)->getId() === Item::AIR){
-					$this->inventory->setArmorItem($slot, $item);
+				if($this->inventory->getChestplate()->getId() === Item::AIR){
+					$this->inventory->getChestplate($item);
 					$this->inventory->setItemInHand(Item::get(Item::AIR));
 				}
 			}
