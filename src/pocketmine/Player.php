@@ -2513,7 +2513,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$this->level->addSound(new LaunchSound($this), $this->getViewers());
 				}
 			}elseif($item instanceof Armor){
-				$slot = ($id - 298) % 4;
+				$slot = ($item->getId() - 298) % 4;
 				if($this->inventory->getArmorItem($slot)->getId() === Item::AIR){
 					$this->inventory->setArmorItem($slot, $item);
 					$this->inventory->setItemInHand(Item::get(Item::AIR));
