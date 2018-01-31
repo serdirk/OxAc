@@ -1735,13 +1735,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			return false;
 		}
 
-		$dV = $this->getDirectionPlane();
-		$dot = $dV->dot(new Vector2($eyePos->x, $eyePos->z));
-		$dot1 = $dV->dot(new Vector2($pos->x, $pos->z));
-		return ($dot1 - $dot) >= -0.8;
+		$dV = $this->getDirectionVector();
+		$eyeDot = $dV->dot($eyePos);
+		$targetDot = $dV->dot($pos);
+		return ($targetDot - $eyeDot) >= M_SQRT3 * -1.25;
 	}
-
-
 
 	protected function processLogin(){
 		if(!$this->server->isWhitelisted($this->iusername)){
@@ -2515,7 +2513,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					$this->level->addSound(new LaunchSound($this), $this->getViewers());
 				}
 			}elseif($item instanceof Armor){
-				$slot = ($item->getId() - 298) % 4;
+				$slot = ($id - 298) % 4;
 				if($this->inventory->getArmorItem($slot)->getId() === Item::AIR){
 					$this->inventory->setArmorItem($slot, $item);
 					$this->inventory->setItemInHand(Item::get(Item::AIR));
