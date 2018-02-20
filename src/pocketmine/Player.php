@@ -231,7 +231,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	public $loggedIn = false;
 	public $joined = false;
 	public $gamemode;
-	public $lastBreak;
 	public $lastProjectile;
 
 	protected $windowCnt = 2;
@@ -297,9 +296,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	protected $autoJump = true;
 	protected $allowFlight = false;
 	protected $flying = false;
-
-	protected $allowMovementCheats = false;
-	protected $allowInstaBreak = false;
 
 	private $needACK = [];
 
@@ -406,22 +402,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 	public function hasAutoJump(){
 		return $this->autoJump;
-	}
-
-	public function allowMovementCheats() : bool{
-		return $this->allowMovementCheats;
-	}
-
-	public function setAllowMovementCheats(bool $value = false){
-		$this->allowMovementCheats = $value;
-	}
-
-	public function allowInstaBreak() : bool{
-		return $this->allowInstaBreak;
-	}
-
-	public function setAllowInstaBreak(bool $value = false){
-		$this->allowInstaBreak = $value;
 	}
 
 	/**
@@ -671,7 +651,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->perm = new PermissibleBase($this);
 		$this->namedtag = new CompoundTag();
 		$this->server = Server::getInstance();
-		$this->lastBreak = PHP_INT_MAX;
 		$this->lastProjectile = PHP_INT_MAX;
 		$this->ip = $ip;
 		$this->port = $port;
@@ -688,9 +667,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		$this->rawUUID = null;
 
 		$this->creationTime = microtime(true);
-
-		$this->allowMovementCheats = (bool) $this->server->getProperty("player.anti-cheat.allow-movement-cheats", false);
-		$this->allowInstaBreak = (bool) $this->server->getProperty("player.anti-cheat.allow-instabreak", false);
 
 		$this->sessionAdapter = new PlayerNetworkSessionAdapter($this->server, $this);
 	}
@@ -2081,6 +2057,11 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 		if($this->spawned === false or !$this->isAlive()){
 			return true;
 		}
+		
+		if($this->gamemode > 1){
+			$this->kick($this->server->getLanguage()->translateString("kick.reason.cheat", ["%ability.gmbypass"]));
+			return true;
+		}
 
 		$this->craftingType = self::CRAFTING_SMALL;
 
@@ -2536,7 +2517,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 
 		switch($packet->action){
 			case PlayerActionPacket::ACTION_START_BREAK:
-				if($this->lastBreak !== PHP_INT_MAX or $pos->distanceSquared($this) > 10000){
+				if($pos->distanceSquared($this) > 10000){
 					break;
 				}
 				$target = $this->level->getBlock($pos);
@@ -2559,12 +2540,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 						$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_BLOCK_START_BREAK, (int) (65535 / $breakTime));
 					}
 				}
-				$this->lastBreak = microtime(true);
 				break;
 
 			/** @noinspection PhpMissingBreakStatementInspection */
 			case PlayerActionPacket::ACTION_ABORT_BREAK:
-				$this->lastBreak = PHP_INT_MAX;
 			case PlayerActionPacket::ACTION_STOP_BREAK:
 				$this->level->broadcastLevelEvent($pos, LevelEventPacket::EVENT_BLOCK_STOP_BREAK);
 				break;
@@ -3104,7 +3083,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	}
 
 	public function handleAdventureSettings(AdventureSettingsPacket $packet) : bool{
-		if($packet->isFlying and !$this->allowFlight and !$this->server->getAllowFlight()){
+		if($packet->isFlying and !$this->allowFlight){
 			$this->kick($this->server->getLanguage()->translateString("kick.reason.cheat", ["%ability.flight"]));
 			return true;
 		}elseif($packet->isFlying !== $this->isFlying()){
@@ -3116,7 +3095,7 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 			}
 		}
 
-		if($packet->noClip and !$this->allowMovementCheats and !$this->isSpectator()){
+		if($packet->noClip and !$this->isSpectator()){
 			$this->kick($this->server->getLanguage()->translateString("kick.reason.cheat", ["%ability.noclip"]));
 			return true;
 		}
