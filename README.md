@@ -19,9 +19,12 @@ However, Prismarine still has a long way to go. We welcome contributions.
 
 Can I test this before I download it?
 -------------
-Yes, you can. Server below is made by main developer of Prismarine and it's 79% based on Prismarine.<br>
+Yes, you can. There is two servers based on this server software.<br>
 
 IP: **play.greenwix.fun**
+Port: **19132**
+
+IP: **play.in-story.org**
 Port: **19132**
 
 Help & Support
