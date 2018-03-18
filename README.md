@@ -19,7 +19,7 @@ However, Prismarine still has a long way to go. We welcome contributions.
 
 Can I test this before I download it?
 -------------
-Yes, you can. There is two servers based on this server software.<br>
+Yes, you can. There are two servers based on this server software.<br>
 
 IP: **play.greenwix.fun**<br>
 Port: **19132**
