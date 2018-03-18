@@ -21,10 +21,10 @@ Can I test this before I download it?
 -------------
 Yes, you can. There is two servers based on this server software.<br>
 
-IP: **play.greenwix.fun**
+IP: **play.greenwix.fun**<br>
 Port: **19132**
 
-IP: **play.in-story.org**
+IP: **play.in-story.org**<br>
 Port: **19132**
 
 Help & Support
